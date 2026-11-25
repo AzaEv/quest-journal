@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: quest-journal
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/quest_journal}
+    username: ${DB_USER:quest}
+    password: ${DB_PASSWORD:quest}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  jwt:
+    # HS256 key, at least 32 bytes. ALWAYS override with the JWT_SECRET env var outside local dev.
+    secret: ${JWT_SECRET:dev-only-secret-change-me-it-must-be-32-bytes-or-more}
+    ttl: ${JWT_TTL:30d}
+    issuer: quest-journal
+  registration:
+    # When set, /api/auth/register requires this code. Leave empty only for local dev.
+    invite-code: ${INVITE_CODE:}
+  sync:
+    # Overlap window for /api/sync so changes committed slightly late are not missed.
+    overlap: 5s

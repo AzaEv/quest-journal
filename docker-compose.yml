@@ -1,0 +1,35 @@
+# Local development: `docker compose up -d db` starts only PostgreSQL,
+# `docker compose up -d --build` starts PostgreSQL and the backend.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: quest_journal
+      POSTGRES_USER: quest
+      POSTGRES_PASSWORD: quest
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quest -d quest_journal"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/quest_journal
+      DB_USER: quest
+      DB_PASSWORD: quest
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-it-must-be-32-bytes-or-more}
+      INVITE_CODE: ${INVITE_CODE:-}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
